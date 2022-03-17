@@ -152,6 +152,14 @@ def get_network(args):
     elif args.net == 'stochasticdepth101':
         from models.stochasticdepth import stochastic_depth_resnet101
         net = stochastic_depth_resnet101()
+    elif args.net == 'newvgg16':
+        from models.vgg import vgg16_bn
+        net = vgg16_bn()
+        if args.weights is not None:
+            print('Load pretrained model')
+            net.load_state_dict(torch.load(args.weights))
+            from models.refactor import NewVGG16
+            net = NewVGG16(net)
 
     else:
         print('the network name you have entered is not supported yet')
