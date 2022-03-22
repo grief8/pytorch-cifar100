@@ -47,8 +47,27 @@ if __name__ == '__main__':
         num_workers=4,
         batch_size=args.b,
     )
-
-    eval_model_path = '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Thursday_17_March_2022_21h_29m_06s/newvgg16-191-best.pth'
+    path_map = {
+        '17-16': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Thursday_17_March_2022_16h_09m_47s/newvgg16-190-best.pth',
+        '17-21': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Thursday_17_March_2022_21h_29m_06s/newvgg16-191-best.pth',
+        '17-18': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Thursday_17_March_2022_18h_35m_38s/newvgg16-199-best.pth',
+        '18-11': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Friday_18_March_2022_11h_32m_50s/newvgg16-200-best.pth',
+        '18-16': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Friday_18_March_2022_16h_30m_02s/newvgg16-177-best.pth',
+        '18-14': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Friday_18_March_2022_14h_41m_19s/newvgg16-183-best.pth',
+        '18-18': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Friday_18_March_2022_18h_01m_12s/newvgg16-174-best.pth',
+        '19-13': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Saturday_19_March_2022_13h_41m_53s/newvgg16-192-best.pth',
+        '19-16': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Saturday_19_March_2022_16h_29m_39s/newvgg16-185-best.pth',
+        '19-21': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Saturday_19_March_2022_21h_46m_13s/newvgg16-170-best.pth',
+        '20-13': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Sunday_20_March_2022_13h_21m_04s/newvgg16-172-best.pth',
+        '20-17': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Sunday_20_March_2022_17h_35m_09s/newvgg16-181-best.pth',
+        '20-21': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Sunday_20_March_2022_21h_31m_09s/newvgg16-184-best.pth',
+        '21-16': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Monday_21_March_2022_16h_56m_44s/newvgg16-174-best.pth',
+        '21-20': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Monday_21_March_2022_20h_34m_06s/newvgg16-187-best.pth',
+        '21-18': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Monday_21_March_2022_18h_48m_51s/newvgg16-196-best.pth',
+        '21-22': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Monday_21_March_2022_22h_18m_00s/newvgg16-196-best.pth',
+        '22-10': '/home/lifabing/projects/pytorch-cifar100/checkpoint/newvgg16/Tuesday_22_March_2022_10h_33m_51s/newvgg16-182-best.pth'
+}
+    eval_model_path = path_map['17-18']
     origin_net = get_origin_model()
     eval_net = get_eval_model(eval_model_path)
     if args.gpu: #use_gpu
@@ -68,7 +87,7 @@ if __name__ == '__main__':
                 label = label.cuda()
 
             output_origin = origin_net(image)
-            output_eval = eval_net(image)
+            output_eval = origin_net(image)
 
             _, pred = output_eval.topk(5, 1, largest=True, sorted=True)
 
