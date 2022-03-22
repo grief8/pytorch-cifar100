@@ -1,7 +1,8 @@
 import math
 
 import numpy as np
-import scipy
+import scipy.stats
+
 
 def mtx_similar1(arr1: np.ndarray, arr2: np.ndarray) -> float:
     """
