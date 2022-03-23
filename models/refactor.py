@@ -28,17 +28,18 @@ class NewVGG16(nn.Module):
         relu_conv2 = nn.Conv2d(64, 64, kernel_size=(2, 2), dilation=(1, 1), stride=(2, 2))
         relu_conv3 = nn.Conv2d(128, 128, kernel_size=(1, 1))
         relu_conv4 = nn.Conv2d(128, 128, kernel_size=(2, 2), dilation=(1, 1), stride=(2, 2))
-        # mods = list(model.features.children())
+        mods = list(model.features.children())
         # mods[2] = relu_conv
         # mods.pop(2)
-        # mods[5] = relu_conv2
+        # mods[5] = relu_conv
+        mods[6] = relu_conv2
         # mods[9] = relu_conv3
         # mods[12] = relu_conv4
         # mods.pop(6)
         # mods.pop(5)
         # mods.pop(5)
         # mods.pop(12)
-        # self.model.features = nn.Sequential(*mods)
+        self.model.features = nn.Sequential(*mods)
         # self.model.classifier = classifier('rp-r2', num_class)
 
     def forward(self, x):
