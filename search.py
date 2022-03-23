@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 
 from conf import settings
-from nas.model import mobilenet
+from nas.mobilenet import mobilenet
 from nni.nas.pytorch.callbacks import ArchitectureCheckpoint, LRSchedulerCallback
 from utils import accuracy, get_training_dataloader, get_test_dataloader
 
@@ -24,8 +24,8 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", default=50, type=int)
     parser.add_argument("--channels", default=16, type=int)
     parser.add_argument("--unrolled", default=False, action="store_true")
-    parser.add_argument("--visualization", default=False, action="store_true")
-    parser.add_argument("--v1", default=False, action="store_true")
+    parser.add_argument("--visualization", default=True, action="store_true")
+    parser.add_argument("--v1", default=True, action="store_true")
     args = parser.parse_args()
 
     dataset_train = get_training_dataloader(
