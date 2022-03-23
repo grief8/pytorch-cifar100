@@ -4,6 +4,7 @@ search mobilenet in pytorch
 
 import torch
 import nni.retiarii.nn.pytorch as nn
+from nni.retiarii import model_wrapper
 
 
 class DepthSeperabelConv2d(nn.Module):
@@ -64,6 +65,7 @@ class BasicConv2d(nn.Module):
         return x
 
 
+@model_wrapper
 class MobileNet(nn.Module):
     """
     Args:
