@@ -1,57 +1,32 @@
 import os
 import random
 from pathlib import Path
+import pickle
 
 import nni
 import torch
-import torch.nn.functional as F
-# remember to import nni.retiarii.nn.pytorch as nn, instead of torch.nn as nn
-import nni.retiarii.nn.pytorch as nn
 import nni.retiarii.strategy as strategy
-from nni.retiarii import model_wrapper
 from nni.retiarii.evaluator import FunctionalEvaluator
 from nni.retiarii.experiment.pytorch import RetiariiExeConfig, RetiariiExperiment, debug_mutated_model
-from torch.utils.data import DataLoader
-from torchvision import transforms
-from torchvision.datasets import MNIST
+from conf import settings
+from nas.mobilenet import mobilenet
+from utils import get_training_dataloader, get_test_dataloader
+
+from models.mobilenet import MobileNet
 
 
-class DepthwiseSeparableConv(nn.Module):
-    def __init__(self, in_ch, out_ch):
-        super().__init__()
-        self.depthwise = nn.Conv2d(in_ch, in_ch, kernel_size=3, groups=in_ch)
-        self.pointwise = nn.Conv2d(in_ch, out_ch, kernel_size=1)
-
-    def forward(self, x):
-        return self.pointwise(self.depthwise(x))
-
-
-@model_wrapper
-class Net(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3, 1)
-        # LayerChoice is used to select a layer between Conv2d and DwConv.
-        self.conv2 = nn.LayerChoice([
-            nn.Conv2d(32, 64, 3, 1),
-            DepthwiseSeparableConv(32, 64)
-        ])
-        # ValueChoice is used to select a dropout rate.
-        # ValueChoice can be used as parameter of modules wrapped in `nni.retiarii.nn.pytorch`
-        # or customized modules wrapped with `@basic_unit`.
-        self.dropout1 = nn.Dropout(nn.ValueChoice([0.25, 0.5, 0.75]))
-        self.dropout2 = nn.Dropout(0.5)
-        feature = nn.ValueChoice([64, 128, 256])
-        # Same value choice can be used multiple times
-        self.fc1 = nn.Linear(9216, feature)
-        self.fc2 = nn.Linear(feature, 10)
-
-    def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.max_pool2d(self.conv2(x), 2)
-        x = torch.flatten(self.dropout1(x), 1)
-        x = self.fc2(self.dropout2(F.relu(self.fc1(x))))
-        return x
+def stat_nonlinear_ops(model, operators):
+    """
+    return sum of nonlinear operators
+    """
+    total = 0
+    for module in model.children():
+        total = total + stat_nonlinear_ops(module, operators)
+        name = module.__class__.__name__
+        for op in operators:
+            if name.find(op) != -1:
+                total = total + 1
+    return total
 
 
 def train_epoch(model, device, train_loader, optimizer, epoch):
@@ -97,23 +72,39 @@ def evaluate_model(model_cls):
 
     # export model for visualization
     if 'NNI_OUTPUT_DIR' in os.environ:
-        torch.onnx.export(model, (torch.randn(1, 1, 28, 28), ),
+        torch.onnx.export(model, (torch.randn(1, 3, 32, 32), ),
                           Path(os.environ['NNI_OUTPUT_DIR']) / 'model.onnx')
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    transf = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-    train_loader = DataLoader(MNIST('data/mnist', download=True, transform=transf), batch_size=64, shuffle=True)
-    test_loader = DataLoader(MNIST('data/mnist', download=True, train=False, transform=transf), batch_size=64)
+    train_loader = get_training_dataloader(
+        settings.CIFAR100_TRAIN_MEAN,
+        settings.CIFAR100_TRAIN_STD,
+        num_workers=4,
+        batch_size=64,
+        shuffle=True
+    )
+    test_loader = get_test_dataloader(
+        settings.CIFAR100_TRAIN_MEAN,
+        settings.CIFAR100_TRAIN_STD,
+        num_workers=4,
+        batch_size=64,
+        shuffle=True
+    )
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     model.to(device)
+    nonlinear_ops = ['ReLU', 'MaxPool']
+    stat = MobileNet()
+    total_nonlinear_ops = stat_nonlinear_ops(stat, nonlinear_ops)
+    num_nonlinear_ops = stat_nonlinear_ops(stat, nonlinear_ops)
     for epoch in range(3):
         # train the model for one epoch
         train_epoch(model, device, train_loader, optimizer, epoch)
         # test the model for one epoch
         accuracy = test_epoch(model, device, test_loader)
         # call report intermediate result. Result can be float or dict
+        accuracy = accuracy + (1-num_nonlinear_ops/total_nonlinear_ops)*0.02
         nni.report_intermediate_result(accuracy)
 
     # report final test result
@@ -121,7 +112,7 @@ def evaluate_model(model_cls):
 
 
 if __name__ == '__main__':
-    base_model = Net()
+    base_model = mobilenet()
 
     search_strategy = strategy.Random()
     model_evaluator = FunctionalEvaluator(evaluate_model)
@@ -130,16 +121,18 @@ if __name__ == '__main__':
 
     exp_config = RetiariiExeConfig('local')
     exp_config.experiment_name = 'cifar100_search'
-    exp_config.trial_concurrency = 2
-    exp_config.max_trial_number = 20
-    exp_config.training_service.use_active_gpu = False
+    exp_config.trial_concurrency = 6
+    exp_config.max_trial_number = 32
+    exp_config.training_service.use_active_gpu = True
     export_formatter = 'dict'
 
     # uncomment this for graph-based execution engine
-    # exp_config.execution_engine = 'base'
-    # export_formatter = 'code'
+    exp_config.execution_engine = 'base'
+    export_formatter = 'code'
 
     exp.run(exp_config, 8081 + random.randint(0, 100))
     print('Final model:')
     for model_code in exp.export_top_models(formatter=export_formatter):
         print(model_code)
+    # with open('checkpoints/exp-mobilenet.o', 'wb') as f:
+    #     pickle.dump(exp, f)
