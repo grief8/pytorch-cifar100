@@ -13,6 +13,8 @@ import torch.nn.functional as F
 from nni.retiarii.oneshot.interface import BaseOneShotTrainer
 from nni.retiarii.oneshot.pytorch.utils import AverageMeterGroup, replace_layer_choice, replace_input_choice, to_device
 
+from nas.tools import stat_output_data
+
 
 _logger = logging.getLogger(__name__)
 
@@ -190,6 +192,7 @@ class DartsTrainer(BaseOneShotTrainer):
 
     def _logits_and_loss(self, X, y):
         logits = self.model(X)
+        print(stat_output_data(self.model, tuple(list(X.size())[1:])))
         loss = self.loss(logits, y)
         return logits, loss
 
