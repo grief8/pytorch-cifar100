@@ -128,6 +128,7 @@ class DartsTrainer(BaseOneShotTrainer):
         self.nonlinear_index = 0
 
         self.constraints = constraints
+        print('constraints: ', self.constraints)
 
         self.nas_modules = []
         replace_layer_choice(self.model, DartsLayerChoice, self.nas_modules)
@@ -304,7 +305,6 @@ class DartsTrainer(BaseOneShotTrainer):
 
     def fit(self):
         for i in range(self.num_epochs):
-            print(stat_output_data(self.model, (3, 32, 32)))
             self._train_one_epoch(i)
 
     @torch.no_grad()

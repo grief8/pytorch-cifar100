@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 
 import torch
 import torch.nn as nn
+from nni.retiarii import fixed_arch
 
 from conf import settings
 from nas.mobilenet import mobilenet
@@ -27,6 +28,8 @@ if __name__ == "__main__":
     parser.add_argument("--visualization", default=True, action="store_true")
     parser.add_argument("--v1", default=False, action="store_true")
     parser.add_argument("--checkpoints", default='./checkpoints/oneshot/mobilenet/contraints-0.5.json', type=str)
+    parser.add_argument("--model-path", default="./checkpoints/oneshot/mobilenet/contraints-0.5.onnx", type=str)
+
     args = parser.parse_args()
 
     dataset_train = get_training_dataloader(
@@ -91,3 +94,11 @@ if __name__ == "__main__":
         final_architecture = trainer.export()
         print('Final architecture:', trainer.export())
         json.dump(trainer.export(), open(args.checkpoints, 'w'))
+        with fixed_arch(args.arc_checkpoint):
+            model = mobilenet()
+            dummy_input1 = torch.randn(1, 3, 32, 32)
+            input_names = ["input_1"]
+            output_names = ["output1"]
+            torch.onnx.export(model, dummy_input1, "./checkpoints/oneshot/mobilenet/mobilenet.onnx", verbose=True,
+                              input_names=input_names,
+                              output_names=output_names)
