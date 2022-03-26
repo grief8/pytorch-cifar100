@@ -165,7 +165,8 @@ class DartsTrainer(BaseOneShotTrainer):
 
     def _cal_new_loss(self, loss):
         self.nonlinear_index = 0
-        loss = loss * math.sqrt(1 - self._get_total_alpha(self.model))
+        constraints = 0.1
+        loss = loss * math.sqrt(1 - self._get_total_alpha(self.model)) * constraints
         return loss
 
     def _init_dataloader(self):

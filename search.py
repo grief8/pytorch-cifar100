@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--unrolled", default=False, action="store_true")
     parser.add_argument("--visualization", default=True, action="store_true")
     parser.add_argument("--v1", default=False, action="store_true")
+    parser.add_argument("--checkpoints", default='./checkpoints/oneshot/mobilenet/contraints-0.5.json', type=str)
     args = parser.parse_args()
 
     dataset_train = get_training_dataloader(
@@ -87,4 +88,4 @@ if __name__ == "__main__":
         trainer.fit()
         final_architecture = trainer.export()
         print('Final architecture:', trainer.export())
-        json.dump(trainer.export(), open('checkpoint.json', 'w'))
+        json.dump(trainer.export(), open(args.checkpoints, 'w'))
