@@ -11,6 +11,7 @@ import torch.nn as nn
 
 from conf import settings
 from nas.mobilenet import mobilenet
+from nas.tools import get_clean_summary
 from nni.nas.pytorch.callbacks import ArchitectureCheckpoint, LRSchedulerCallback
 from utils import accuracy, get_training_dataloader, get_test_dataloader
 
@@ -43,6 +44,7 @@ if __name__ == "__main__":
         wrap=False
     )
     model = mobilenet()
+
     criterion = nn.CrossEntropyLoss()
 
     optim = torch.optim.SGD(model.parameters(), 0.025, momentum=0.9, weight_decay=3.0E-4)
@@ -67,6 +69,9 @@ if __name__ == "__main__":
         trainer.train()
     else:
         from nas.new_darts import DartsTrainer
+        from models.mobilenet import mobilenet as mb
+        summary = get_clean_summary(mb(), (3, 32, 32))
+
         trainer = DartsTrainer(
             model=model,
             loss=criterion,
@@ -76,7 +81,8 @@ if __name__ == "__main__":
             dataset=dataset_train,
             batch_size=args.batch_size,
             log_frequency=args.log_frequency,
-            unrolled=args.unrolled
+            unrolled=args.unrolled,
+            nonlinear_summary=summary
         )
         trainer.fit()
         final_architecture = trainer.export()
