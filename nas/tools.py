@@ -20,7 +20,6 @@ def sift(summary, ops):
 
 
 def model_summary(model, input_size, batch_size=-1, device="cuda"):
-
     def register_hook(module):
 
         def hook(module, input, output):
@@ -48,9 +47,9 @@ def model_summary(model, input_size, batch_size=-1, device="cuda"):
             summary[m_key]["nb_params"] = params
 
         if (
-            not isinstance(module, nn.Sequential)
-            and not isinstance(module, nn.ModuleList)
-            and not (module == model)
+                not isinstance(module, nn.Sequential)
+                and not isinstance(module, nn.ModuleList)
+                and not (module == model)
         ):
             hooks.append(module.register_forward_hook(hook))
 
@@ -61,6 +60,7 @@ def model_summary(model, input_size, batch_size=-1, device="cuda"):
     ], "Input device is not valid, please specify 'cuda' or 'cpu'"
 
     if device == "cuda" and torch.cuda.is_available():
+        model.to(device)
         dtype = torch.cuda.FloatTensor
     else:
         dtype = torch.FloatTensor
@@ -95,3 +95,15 @@ def stat_output_data(model, input_size, batch_size=-1, device="cuda", ops=None):
     if ops is None:
         ops = ['ReLU', 'MaxPool']
     return sift(model_summary(model, input_size, batch_size, device), ops)
+
+
+def get_clean_summary(model, input_size, batch_size=-1, device="cuda", ops=None):
+    if ops is None:
+        ops = ['ReLU', 'MaxPool']
+    summary = model_summary(model, input_size, batch_size, device)
+    new_sum = []
+    for layer in summary:
+        for op in ops:
+            if layer.find(op) != -1:
+                new_sum.append(size2memory(summary[layer]["output_shape"]))
+    return new_sum
