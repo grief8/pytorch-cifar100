@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     with fixed_arch(args.arc_checkpoint):
         model = mobilenet()
-        dummy_input1 = torch.randn(1, 3, 32, 323)
+        dummy_input1 = torch.randn(1, 3, 32, 32)
         # dummy_input2 = torch.randn(1, 3, 64, 64)
         # dummy_input3 = torch.randn(1, 3, 64, 64)
         input_names = ["input_1"]
