@@ -114,12 +114,19 @@ if __name__ == "__main__":
     parser.add_argument("--drop-path-prob", default=0.2, type=float)
     parser.add_argument("--workers", default=4)
     parser.add_argument("--grad-clip", default=5., type=float)
-    parser.add_argument("--arc-checkpoint", default="./checkpoint.json")
+    parser.add_argument("--arc-checkpoint", default="./checkpoints/oneshot/mobilenet/checkpoint.json")
 
     args = parser.parse_args()
 
     with fixed_arch(args.arc_checkpoint):
         model = mobilenet()
+        dummy_input1 = torch.randn(1, 3, 32, 323)
+        # dummy_input2 = torch.randn(1, 3, 64, 64)
+        # dummy_input3 = torch.randn(1, 3, 64, 64)
+        input_names = ["input_1"]
+        output_names = ["output1"]
+        torch.onnx.export(model, dummy_input1, "./checkpoints/oneshot/mobilenet/mobilenet.onnx", verbose=True, input_names=input_names,
+                          output_names=output_names)
     criterion = nn.CrossEntropyLoss()
 
     model.to(device)
