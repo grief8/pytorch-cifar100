@@ -4,6 +4,7 @@ A reimplementation of NNI DARTS example
 
 import copy
 import logging
+import math
 from collections import OrderedDict
 
 import torch
@@ -111,7 +112,7 @@ class DartsTrainer(BaseOneShotTrainer):
                  num_epochs, dataset, grad_clip=5.,
                  learning_rate=2.5E-3, batch_size=64, workers=4,
                  device=None, log_frequency=None,
-                 arc_learning_rate=3.0E-4, unrolled=False):
+                 arc_learning_rate=3.0E-4, unrolled=False, nonlinear_summary=None):
         self.model = model
         self.loss = loss
         self.metrics = metrics
@@ -122,6 +123,9 @@ class DartsTrainer(BaseOneShotTrainer):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') if device is None else device
         self.log_frequency = log_frequency
         self.model.to(self.device)
+        self.nonlinear_summary = nonlinear_summary
+        self.nonlinear_size = self._get_nonlinear_size()
+        self.nonlinear_index = 0
 
         self.nas_modules = []
         replace_layer_choice(self.model, DartsLayerChoice, self.nas_modules)
@@ -144,6 +148,25 @@ class DartsTrainer(BaseOneShotTrainer):
         self.grad_clip = 5.
 
         self._init_dataloader()
+
+    def _get_nonlinear_size(self):
+        return sum(self.nonlinear_summary)
+
+    def _get_total_alpha(self, model):
+        total = 0.0
+        for module in model.children():
+            total = total + self._get_total_alpha(module)
+            name = module.__class__.__name__
+            if name.find('DartsLayerChoice') != -1:
+                n_alpha = F.softmax(module.alpha, -1).detach().cpu().numpy()[1]
+                total = total + n_alpha * self.nonlinear_summary[self.nonlinear_index] / self.nonlinear_size
+                self.nonlinear_index += 1
+        return total
+
+    def _cal_new_loss(self, loss):
+        self.nonlinear_index = 0
+        loss = loss * math.sqrt(1 - self._get_total_alpha(self.model))
+        return loss
 
     def _init_dataloader(self):
         n_train = len(self.dataset)
@@ -192,8 +215,8 @@ class DartsTrainer(BaseOneShotTrainer):
 
     def _logits_and_loss(self, X, y):
         logits = self.model(X)
-        print(stat_output_data(self.model, tuple(list(X.size())[1:])))
         loss = self.loss(logits, y)
+        loss = self._cal_new_loss(loss)
         return logits, loss
 
     def _backward(self, val_X, val_y):
@@ -279,6 +302,7 @@ class DartsTrainer(BaseOneShotTrainer):
 
     def fit(self):
         for i in range(self.num_epochs):
+            print(stat_output_data(self.model, (3, 32, 32)))
             self._train_one_epoch(i)
 
     @torch.no_grad()
