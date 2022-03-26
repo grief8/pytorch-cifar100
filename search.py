@@ -22,6 +22,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch-size", default=64, type=int)
     parser.add_argument("--log-frequency", default=10, type=int)
     parser.add_argument("--epochs", default=50, type=int)
+    parser.add_argument("--constraints", default=1.0, type=float)
     parser.add_argument("--unrolled", default=False, action="store_true")
     parser.add_argument("--visualization", default=True, action="store_true")
     parser.add_argument("--v1", default=False, action="store_true")
@@ -81,6 +82,7 @@ if __name__ == "__main__":
             num_epochs=args.epochs,
             dataset=dataset_train,
             batch_size=args.batch_size,
+            constraints=args.constraints,
             log_frequency=args.log_frequency,
             unrolled=args.unrolled,
             nonlinear_summary=summary
