@@ -99,6 +99,6 @@ if __name__ == "__main__":
             dummy_input1 = torch.randn(1, 3, 32, 32)
             input_names = ["input_1"]
             output_names = ["output1"]
-            torch.onnx.export(model, dummy_input1, "./checkpoints/oneshot/mobilenet/mobilenet.onnx", verbose=True,
+            torch.onnx.export(model, dummy_input1, args.model_path, verbose=True,
                               input_names=input_names,
                               output_names=output_names)
