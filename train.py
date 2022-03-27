@@ -23,6 +23,8 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from conf import settings
+from nas.mobilenet import mobilenet
+from nas.tools import reconstruct_model
 from utils import get_network, get_training_dataloader, get_test_dataloader, WarmUpLR, \
     most_recent_folder, most_recent_weights, last_epoch, best_acc_weights
 
@@ -127,10 +129,12 @@ if __name__ == '__main__':
     parser.add_argument('-warm', type=int, default=1, help='warm up training phase')
     parser.add_argument('-lr', type=float, default=0.1, help='initial learning rate')
     parser.add_argument('-resume', action='store_true', default=False, help='resume training')
+    parser.add_argument("--arc-checkpoint", default="./checkpoints/oneshot/mobilenet/checkpoint.json")
+
     args = parser.parse_args()
 
-    net = get_network(args)
-
+    # net = get_network(args)
+    net = reconstruct_model(mobilenet, args.arc_checkpoint, 'cpu' if not args.gpu else 'cuda')
 
     # data preprocessing:
     cifar100_training_loader = get_training_dataloader(
