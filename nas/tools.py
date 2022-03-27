@@ -4,6 +4,8 @@ import torch.nn as nn
 from functools import reduce
 from collections import OrderedDict
 
+from nni.retiarii import fixed_arch
+
 
 def size2memory(size):
     ln = reduce(lambda x, y: x * y, size)
@@ -107,3 +109,9 @@ def get_clean_summary(model, input_size, batch_size=-1, device="cuda", ops=None)
             if layer.find(op) != -1:
                 new_sum.append(size2memory(summary[layer]["output_shape"]))
     return new_sum
+
+
+def reconstruct_model(super_model, arc_checkpoints):
+    with fixed_arch(arc_checkpoints):
+        model = super_model()
+        return model
