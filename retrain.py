@@ -109,7 +109,7 @@ if __name__ == "__main__":
     parser.add_argument("--layers", default=20, type=int)
     parser.add_argument("--batch-size", default=96, type=int)
     parser.add_argument("--log-frequency", default=10, type=int)
-    parser.add_argument("--epochs", default=600, type=int)
+    parser.add_argument("--epochs", default=5, type=int)
     parser.add_argument("--aux-weight", default=None, type=float)
     parser.add_argument("--drop-path-prob", default=0.2, type=float)
     parser.add_argument("--workers", default=4)
@@ -120,13 +120,6 @@ if __name__ == "__main__":
 
     with fixed_arch(args.arc_checkpoint):
         model = mobilenet()
-        dummy_input1 = torch.randn(1, 3, 32, 32)
-        # dummy_input2 = torch.randn(1, 3, 64, 64)
-        # dummy_input3 = torch.randn(1, 3, 64, 64)
-        input_names = ["input_1"]
-        output_names = ["output1"]
-        torch.onnx.export(model, dummy_input1, "./checkpoints/oneshot/mobilenet/mobilenet.onnx", verbose=True, input_names=input_names,
-                          output_names=output_names)
     criterion = nn.CrossEntropyLoss()
 
     model.to(device)
