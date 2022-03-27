@@ -94,7 +94,7 @@ if __name__ == "__main__":
         final_architecture = trainer.export()
         print('Final architecture:', trainer.export())
         json.dump(trainer.export(), open(args.checkpoints, 'w'))
-        with fixed_arch(args.arc_checkpoint):
+        with fixed_arch(args.checkpoints):
             model = mobilenet()
             dummy_input1 = torch.randn(1, 3, 32, 32)
             input_names = ["input_1"]
