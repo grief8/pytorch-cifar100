@@ -111,7 +111,7 @@ class DartsTrainer(BaseOneShotTrainer):
     def __init__(self, model, loss, metrics, optimizer,
                  num_epochs, dataset, grad_clip=5.,
                  learning_rate=2.5E-3, batch_size=64, workers=4, constraints=1.0,
-                 device=None, log_frequency=None,
+                 device=None, log_frequency=None, loss_type='origin',
                  arc_learning_rate=3.0E-4, unrolled=False, nonlinear_summary=None):
         self.model = model
         self.loss = loss
@@ -129,6 +129,7 @@ class DartsTrainer(BaseOneShotTrainer):
 
         self.constraints = constraints
         print('constraints: ', self.constraints)
+        self.loss_type = loss_type
 
         self.nas_modules = []
         replace_layer_choice(self.model, DartsLayerChoice, self.nas_modules)
@@ -168,6 +169,12 @@ class DartsTrainer(BaseOneShotTrainer):
 
     def _cal_new_loss(self, loss):
         self.nonlinear_index = 0
+        if self.loss_type == 'origin':
+            loss = loss
+        elif self.loss_type == 'log':
+            loss = loss * (- math.log(1 - self._get_total_alpha(self.model)) * self.constraints)
+        elif self.loss_type == 'sqrt':
+            loss = loss * math.sqrt(1 - self._get_total_alpha(self.model)) * self.constraints
         # 0 < alpha < 1
         # loss = loss * math.sqrt(1 - self._get_total_alpha(self.model)) * self.constraints
         # alpha > 1
