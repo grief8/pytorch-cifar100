@@ -36,6 +36,7 @@ if __name__ == '__main__':
     base = '/home/lifabing/projects/pytorch-cifar100/runs/mobilenet'
     data = get_accuracy(base)
     data = [(key, data[key]) for key in sorted(data)]
-    print(data)
+    for i in range(len(data)):
+        print('{}   {}'.format((i + 1) / 10., data[i][1]))
 
 
