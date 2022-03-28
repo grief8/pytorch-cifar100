@@ -172,13 +172,11 @@ class DartsTrainer(BaseOneShotTrainer):
         if self.loss_type == 'origin':
             loss = loss
         elif self.loss_type == 'log':
+            # alpha > 1
             loss = loss * (- math.log(1 - self._get_total_alpha(self.model)) * self.constraints)
         elif self.loss_type == 'sqrt':
+            # 0 < alpha < 1
             loss = loss * math.sqrt(1 - self._get_total_alpha(self.model)) * self.constraints
-        # 0 < alpha < 1
-        # loss = loss * math.sqrt(1 - self._get_total_alpha(self.model)) * self.constraints
-        # alpha > 1
-        loss = loss * (- math.log(1 - self._get_total_alpha(self.model)) * self.constraints)
         return loss
 
     def _init_dataloader(self):

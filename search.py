@@ -24,6 +24,7 @@ if __name__ == "__main__":
     parser.add_argument("--worker-id", default=0, type=int)
     parser.add_argument("--batch-size", default=64, type=int)
     parser.add_argument("--log-frequency", default=10, type=int)
+    parser.add_argument('--loss-type', type=str, default='origin', help='the way to change loss function')
     parser.add_argument("--epochs", default=50, type=int)
     parser.add_argument("--constraints", default=1.0, type=float)
     parser.add_argument("--unrolled", default=False, action="store_true")
@@ -70,17 +71,10 @@ if __name__ == "__main__":
         constraints=args.constraints,
         log_frequency=args.log_frequency,
         unrolled=args.unrolled,
-        nonlinear_summary=summary
+        nonlinear_summary=summary,
+        loss_type=args.loss_type
     )
     trainer.fit()
     final_architecture = trainer.export()
     print('Final architecture:', trainer.export())
     json.dump(trainer.export(), open(args.checkpoints, 'w'))
-    with fixed_arch(args.checkpoints):
-        model = get_nas_network(args)
-        dummy_input1 = torch.randn(1, 3, 32, 32)
-        input_names = ["input_1"]
-        output_names = ["output_1"]
-        torch.onnx.export(model, dummy_input1, args.model_path, verbose=True,
-                          input_names=input_names,
-                          output_names=output_names)
