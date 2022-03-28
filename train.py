@@ -124,7 +124,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--net', type=str, required=True, help='net type')
     parser.add_argument('--weights', type=str, default=None, help='the weights file you want to test')
+    parser.add_argument('--loss-type', type=str, default='origin', help='the way to change loss function')
     parser.add_argument('--gpu', action='store_true', default=False, help='use gpu or not')
+    parser.add_argument("--worker-id", default=0, type=int)
     parser.add_argument('--b', type=int, default=128, help='batch size for dataloader')
     parser.add_argument('--warm', type=int, default=1, help='warm up training phase')
     parser.add_argument('--lr', type=float, default=0.1, help='initial learning rate')
@@ -133,7 +135,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    net = reconstruct_model(get_nas_network(args), args.arc_checkpoint, 'cpu' if not args.gpu else 'cuda')
+    torch.cuda.set_device(args.worker_id)
+    net = reconstruct_model(get_nas_network(args, class_flag=True), args.arc_checkpoint, 'cpu' if not args.gpu else 'cuda')
 
     # data preprocessing:
     cifar100_training_loader = get_training_dataloader(
@@ -160,14 +163,14 @@ if __name__ == '__main__':
     warmup_scheduler = WarmUpLR(optimizer, iter_per_epoch * args.warm)
 
     if args.resume:
-        recent_folder = most_recent_folder(os.path.join(settings.CHECKPOINT_PATH, args.net), fmt=settings.DATE_FORMAT)
+        recent_folder = most_recent_folder(os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type), fmt=settings.DATE_FORMAT)
         if not recent_folder:
             raise Exception('no recent folder were found')
 
-        checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, recent_folder)
+        checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type, recent_folder)
 
     else:
-        checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, settings.TIME_NOW)
+        checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type, settings.TIME_NOW)
 
     # use tensorboard
     if not os.path.exists(settings.LOG_DIR):
@@ -176,7 +179,7 @@ if __name__ == '__main__':
     # since tensorboard can't overwrite old values
     # so the only way is to create a new tensorboard log
     writer = SummaryWriter(log_dir=os.path.join(
-        settings.LOG_DIR, args.net, args.arc_checkpoint.strip('.json')))
+        settings.LOG_DIR, args.net, args.arc_checkpoint.split('/')[-1].strip('.json')))
     input_tensor = torch.Tensor(1, 3, 32, 32)
     if args.gpu:
         input_tensor = input_tensor.cuda()
