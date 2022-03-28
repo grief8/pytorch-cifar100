@@ -25,7 +25,7 @@ def get_nas_network(args):
         net = resnet50(pretrained=True)
     elif args.net == 'resnet18':
         from nas.resnet import resnet18
-        net = resnet18(pretrained=True)
+        net = resnet18()
     elif args.net == 'resnet34':
         from nas.resnet import resnet34
         net = resnet34(pretrained=True)
@@ -86,19 +86,19 @@ def get_network(args):
         from models.xception import xception
         net = xception()
     elif args.net == 'resnet18':
-        from models.resnet import resnet18
+        from torchvision.models.resnet import resnet18
         net = resnet18()
     elif args.net == 'resnet34':
-        from models.resnet import resnet34
+        from torchvision.models.resnet import resnet34
         net = resnet34()
     elif args.net == 'resnet50':
-        from models.resnet import resnet50
+        from torchvision.models.resnet import resnet50
         net = resnet50()
     elif args.net == 'resnet101':
-        from models.resnet import resnet101
+        from torchvision.models.resnet import resnet101
         net = resnet101()
     elif args.net == 'resnet152':
-        from models.resnet import resnet152
+        from torchvision.models.resnet import resnet152
         net = resnet152()
     elif args.net == 'preactresnet18':
         from models.preactresnet import preactresnet18
