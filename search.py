@@ -13,7 +13,7 @@ from nni.retiarii import fixed_arch
 from conf import settings
 from nas.tools import get_clean_summary
 from nas.new_darts import DartsTrainer
-from utils import accuracy, get_training_dataloader, get_test_dataloader, get_nas_network
+from utils import accuracy, get_training_dataloader, get_test_dataloader, get_nas_network, get_network
 
 logger = logging.getLogger('nni')
 
@@ -56,8 +56,7 @@ if __name__ == "__main__":
     optim = torch.optim.SGD(model.parameters(), 0.025, momentum=0.9, weight_decay=3.0E-4)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, args.epochs, eta_min=0.001)
 
-    from models.mobilenet import mobilenet as mb
-    summary = get_clean_summary(mb(), (3, 32, 32))
+    summary = get_clean_summary(get_network(args), (3, 32, 32))
 
     trainer = DartsTrainer(
         model=model,
