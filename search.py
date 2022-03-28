@@ -19,15 +19,15 @@ logger = logging.getLogger('nni')
 
 if __name__ == "__main__":
     parser = ArgumentParser("darts")
-    parser.add_argument('--net', default='mobilenet', type=str, required=True, help='net type')
+    parser.add_argument('--net', default='resnet18', type=str, help='net type')
     parser.add_argument('--gpu', action='store_true', default=False, help='use gpu or not')
+    parser.add_argument("--worker-id", default=0, type=int)
     parser.add_argument("--batch-size", default=64, type=int)
     parser.add_argument("--log-frequency", default=10, type=int)
     parser.add_argument("--epochs", default=50, type=int)
     parser.add_argument("--constraints", default=1.0, type=float)
     parser.add_argument("--unrolled", default=False, action="store_true")
     parser.add_argument("--visualization", default=True, action="store_true")
-    parser.add_argument("--v1", default=False, action="store_true")
     parser.add_argument("--checkpoints", default='./checkpoints/oneshot/mobilenet/contraints-0.5.json', type=str)
     parser.add_argument("--model-path", default="./checkpoints/oneshot/mobilenet/contraints-0.5.onnx", type=str)
 
@@ -49,7 +49,8 @@ if __name__ == "__main__":
         shuffle=True,
         wrap=False
     )
-    model = get_nas_network(args.net)
+    torch.cuda.set_device(args.worker_id)
+    model = get_nas_network(args)
 
     criterion = nn.CrossEntropyLoss()
 
@@ -76,7 +77,7 @@ if __name__ == "__main__":
     print('Final architecture:', trainer.export())
     json.dump(trainer.export(), open(args.checkpoints, 'w'))
     with fixed_arch(args.checkpoints):
-        model = get_nas_network(args.net)
+        model = get_nas_network(args)
         dummy_input1 = torch.randn(1, 3, 32, 32)
         input_names = ["input_1"]
         output_names = ["output_1"]
