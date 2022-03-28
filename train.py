@@ -25,7 +25,7 @@ from torch.utils.tensorboard import SummaryWriter
 from conf import settings
 from nas.mobilenet import mobilenet
 from nas.tools import reconstruct_model
-from utils import get_network, get_training_dataloader, get_test_dataloader, WarmUpLR, \
+from utils import get_nas_network, get_training_dataloader, get_test_dataloader, WarmUpLR, \
     most_recent_folder, most_recent_weights, last_epoch, best_acc_weights
 
 
@@ -122,19 +122,18 @@ def eval_training(epoch=0, tb=True):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-net', type=str, required=True, help='net type')
-    parser.add_argument('-weights', type=str, default=None, help='the weights file you want to test')
-    parser.add_argument('-gpu', action='store_true', default=False, help='use gpu or not')
-    parser.add_argument('-b', type=int, default=128, help='batch size for dataloader')
-    parser.add_argument('-warm', type=int, default=1, help='warm up training phase')
-    parser.add_argument('-lr', type=float, default=0.1, help='initial learning rate')
-    parser.add_argument('-resume', action='store_true', default=False, help='resume training')
+    parser.add_argument('--net', type=str, required=True, help='net type')
+    parser.add_argument('--weights', type=str, default=None, help='the weights file you want to test')
+    parser.add_argument('--gpu', action='store_true', default=False, help='use gpu or not')
+    parser.add_argument('--b', type=int, default=128, help='batch size for dataloader')
+    parser.add_argument('--warm', type=int, default=1, help='warm up training phase')
+    parser.add_argument('--lr', type=float, default=0.1, help='initial learning rate')
+    parser.add_argument('--resume', action='store_true', default=False, help='resume training')
     parser.add_argument("--arc-checkpoint", default="./checkpoints/oneshot/mobilenet/checkpoint.json")
 
     args = parser.parse_args()
 
-    # net = get_network(args)
-    net = reconstruct_model(mobilenet, args.arc_checkpoint, 'cpu' if not args.gpu else 'cuda')
+    net = reconstruct_model(get_nas_network(args), args.arc_checkpoint, 'cpu' if not args.gpu else 'cuda')
 
     # data preprocessing:
     cifar100_training_loader = get_training_dataloader(
