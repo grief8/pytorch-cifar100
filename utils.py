@@ -16,6 +16,32 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 
+def get_nas_network(args):
+    if args.net == 'mobilenet':
+        from nas.mobilenet import mobilenet
+        net = mobilenet()
+    elif args.net == 'resnet50':
+        from nas.resnet import resnet50
+        net = resnet50(pretrained=True)
+    elif args.net == 'resnet18':
+        from nas.resnet import resnet18
+        net = resnet18(pretrained=True)
+    elif args.net == 'resnet34':
+        from nas.resnet import resnet34
+        net = resnet34(pretrained=True)
+    elif args.net == 'resnet18':
+        from nas.resnet import resnet152
+        net = resnet152(pretrained=True)
+    else:
+        print('the network name you have entered is not supported yet')
+        sys.exit()
+
+    if args.gpu:  # use_gpu
+        net = net.cuda()
+
+    return net
+
+
 def get_network(args):
     """ return given network
     """
