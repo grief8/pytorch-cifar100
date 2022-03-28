@@ -98,7 +98,7 @@ if __name__ == "__main__":
             model = mobilenet()
             dummy_input1 = torch.randn(1, 3, 32, 32)
             input_names = ["input_1"]
-            output_names = ["output1"]
+            output_names = ["output_1"]
             torch.onnx.export(model, dummy_input1, args.model_path, verbose=True,
                               input_names=input_names,
                               output_names=output_names)
