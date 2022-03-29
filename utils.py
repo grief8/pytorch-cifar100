@@ -37,7 +37,7 @@ def get_nas_network(args, class_flag=False):
         sys.exit()
 
     if not class_flag:
-        net = net()
+        net = net(args.pretrained)
         if args.gpu:  # use_gpu
             net = net.cuda()
 
