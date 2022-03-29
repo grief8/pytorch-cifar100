@@ -3,12 +3,14 @@
 
 import json
 import logging
+import os
 import time
 from argparse import ArgumentParser
 
 import torch
 import torch.nn as nn
 from nni.retiarii import fixed_arch
+from torch.utils.tensorboard import SummaryWriter
 
 from conf import settings
 from nas.tools import get_clean_summary
@@ -61,6 +63,9 @@ if __name__ == "__main__":
 
     summary = get_clean_summary(get_network(args), (3, 32, 32))
 
+    writer = SummaryWriter(log_dir=os.path.join(
+        settings.LOG_DIR, 'search', args.net, args.loss_type, args.arc_checkpoint.split('/')[-1].strip('.json')))
+
     trainer = DartsTrainer(
         model=model,
         loss=criterion,
@@ -73,9 +78,11 @@ if __name__ == "__main__":
         log_frequency=args.log_frequency,
         unrolled=args.unrolled,
         nonlinear_summary=summary,
-        loss_type=args.loss_type
+        loss_type=args.loss_type,
+        writer=writer
     )
     trainer.fit()
     final_architecture = trainer.export()
     print('Final architecture:', trainer.export())
     json.dump(trainer.export(), open(args.arc_checkpoint, 'w'))
+    writer.close()

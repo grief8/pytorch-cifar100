@@ -14,8 +14,6 @@ import torch.nn.functional as F
 from nni.retiarii.oneshot.interface import BaseOneShotTrainer
 from nni.retiarii.oneshot.pytorch.utils import AverageMeterGroup, replace_layer_choice, replace_input_choice, to_device
 
-from nas.tools import stat_output_data
-
 
 _logger = logging.getLogger(__name__)
 
@@ -111,7 +109,7 @@ class DartsTrainer(BaseOneShotTrainer):
     def __init__(self, model, loss, metrics, optimizer,
                  num_epochs, dataset, grad_clip=5.,
                  learning_rate=2.5E-3, batch_size=64, workers=4, constraints=1.0,
-                 device=None, log_frequency=None, loss_type='origin',
+                 device=None, log_frequency=None, loss_type='origin', writer=None,
                  arc_learning_rate=3.0E-4, unrolled=False, nonlinear_summary=None):
         self.model = model
         self.loss = loss
@@ -130,6 +128,8 @@ class DartsTrainer(BaseOneShotTrainer):
         self.constraints = constraints
         print('constraints: ', self.constraints)
         self.loss_type = loss_type
+
+        self.writer = writer
 
         self.nas_modules = []
         replace_layer_choice(self.model, DartsLayerChoice, self.nas_modules)
@@ -223,6 +223,9 @@ class DartsTrainer(BaseOneShotTrainer):
             if self.log_frequency is not None and step % self.log_frequency == 0:
                 _logger.info('Epoch [%s/%s] Step [%s/%s]  %s', epoch + 1,
                              self.num_epochs, step + 1, len(self.train_loader), meters)
+                if self.writer is not None:
+                    self.writer.add_scalar('Train/loss', meters['loss'].val, epoch * len(self.train_loader) + step)
+                    self.writer.add_scalar('Train/accuracy', meters['acc1'].val, epoch * len(self.train_loader) + step)
 
     def _logits_and_loss(self, X, y):
         logits = self.model(X)
