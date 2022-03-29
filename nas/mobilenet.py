@@ -213,5 +213,5 @@ class MobileNet(nn.Module):
         return x
 
 
-def mobilenet(alpha=1, class_num=100):
+def mobilenet(alpha=1, class_num=100, pretrained=False):
     return MobileNet(alpha, class_num)
