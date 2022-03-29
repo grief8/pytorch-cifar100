@@ -191,6 +191,7 @@ if __name__ == '__main__':
     checkpoint_path = os.path.join(checkpoint_path, '{net}-{epoch}-{type}.pth')
 
     best_acc = 0.0
+    last_weight_path = None
     if args.resume:
         best_weights = best_acc_weights(os.path.join(settings.CHECKPOINT_PATH, args.net, recent_folder))
         if best_weights:
@@ -226,7 +227,10 @@ if __name__ == '__main__':
             weights_path = checkpoint_path.format(net=args.net, epoch=epoch, type='best')
             print('saving weights file to {}'.format(weights_path))
             torch.save(net.state_dict(), weights_path)
+            if last_weight_path is not None and os.path.exists(last_weight_path):
+                os.remove(last_weight_path)
             best_acc = acc
+            last_weight_path = weights_path
             continue
 
         if not epoch % settings.SAVE_EPOCH:
