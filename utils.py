@@ -15,6 +15,10 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
+
 
 def get_nas_network(args, class_flag=False):
     if args.net == 'mobilenet':
@@ -32,6 +36,18 @@ def get_nas_network(args, class_flag=False):
     elif args.net == 'resnet18':
         from nas.resnet import resnet152
         net = resnet152
+    elif args.net == 'vgg16':
+        from nas.vgg import vgg16_bn
+        net = vgg16_bn
+    elif args.net == 'vgg13':
+        from nas.vgg import vgg13_bn
+        net = vgg13_bn
+    elif args.net == 'vgg11':
+        from nas.vgg import vgg11_bn
+        net = vgg11_bn
+    elif args.net == 'vgg19':
+        from nas.vgg import vgg19_bn
+        net = vgg19_bn
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
