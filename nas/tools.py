@@ -112,7 +112,7 @@ def get_clean_summary(model, input_size, batch_size=-1, device="cuda", ops=None)
 
 
 def reconstruct_model(super_model, arc_checkpoints, device="cuda"):
-    with fixed_arch(arc_checkpoints):
+    with fixed_arch(arc_checkpoints, verbose=False):
         model = super_model()
         if device == "cuda" and torch.cuda.is_available():
             model.to(device)

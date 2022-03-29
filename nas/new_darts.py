@@ -128,6 +128,7 @@ class DartsTrainer(BaseOneShotTrainer):
         self.constraints = constraints
         print('constraints: ', self.constraints)
         self.loss_type = loss_type
+        print('loss_type: ', self.loss_type)
 
         self.writer = writer
 
