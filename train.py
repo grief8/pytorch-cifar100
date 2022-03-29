@@ -179,7 +179,7 @@ if __name__ == '__main__':
     # since tensorboard can't overwrite old values
     # so the only way is to create a new tensorboard log
     writer = SummaryWriter(log_dir=os.path.join(
-        settings.LOG_DIR, args.net, args.arc_checkpoint.split('/')[-1].strip('.json')))
+        settings.LOG_DIR, args.net, args.loss_type, args.arc_checkpoint.split('/')[-1].strip('.json')))
     input_tensor = torch.Tensor(1, 3, 32, 32)
     if args.gpu:
         input_tensor = input_tensor.cuda()
