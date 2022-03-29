@@ -1,7 +1,7 @@
 #!/bin/bash
 for constraint in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0;
 do
-  model=resnet50
+  model=resnet18
   lossType=sqrt
   dir=./checkpoints/oneshot/"${model}"/"${lossType}"
   #  search
@@ -11,7 +11,8 @@ do
   --gpu \
   --pretrained \
   --worker-id 0 \
-  --batch-size 512 \
+  --epochs 200 \
+  --batch-size 2048 \
   --loss-type "${lossType}" \
   --constraint $constraint \
   --arc-checkpoint "${dir}"/contraints-$constraint.json \
@@ -21,8 +22,8 @@ do
   --net "${model}" \
   --gpu \
   --pretrained \
-  --worker-id 1 \
-  --batch-size 512 \
+  --worker-id 3 \
+  --batch-size 1024 \
   --loss-type "${lossType}" \
   --arc-checkpoint "${dir}"/contraints-$constraint.json &
 
