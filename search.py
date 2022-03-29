@@ -29,7 +29,7 @@ if __name__ == "__main__":
     parser.add_argument("--constraints", default=1.0, type=float)
     parser.add_argument("--unrolled", default=False, action="store_true")
     parser.add_argument("--visualization", default=True, action="store_true")
-    parser.add_argument("--checkpoints", default='./checkpoints/oneshot/mobilenet/contraints-0.5.json', type=str)
+    parser.add_argument("--arc-checkpoint", default='./checkpoints/oneshot/mobilenet/contraints-0.5.json', type=str)
     parser.add_argument("--model-path", default="./checkpoints/oneshot/mobilenet/contraints-0.5.onnx", type=str)
 
     args = parser.parse_args()
@@ -77,4 +77,4 @@ if __name__ == "__main__":
     trainer.fit()
     final_architecture = trainer.export()
     print('Final architecture:', trainer.export())
-    json.dump(trainer.export(), open(args.checkpoints, 'w'))
+    json.dump(trainer.export(), open(args.arc_checkpoint, 'w'))
