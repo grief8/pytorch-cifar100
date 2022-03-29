@@ -1,9 +1,8 @@
 #!/bin/bash
 for constraint in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0;
 do
-  echo constraint: $constraint
-  model=vgg16
-  lossType=logfunction
+  model=resnet50
+  lossType=sqrt
   dir=./checkpoints/oneshot/"${model}"/"${lossType}"
   #  search
   mkdir -p "${dir}"
@@ -11,13 +10,20 @@ do
   --net "${model}" \
   --gpu \
   --pretrained \
-  --worker-id 1 \
-  --batch-size 256 \
+  --worker-id 0 \
+  --batch-size 512 \
   --loss-type "${lossType}" \
   --constraint $constraint \
   --arc-checkpoint "${dir}"/contraints-$constraint.json \
   --model-path "${dir}"/contraints-$constraint.onnx
 #  retrain
-#  python train.py --net "${model}" --gpu --worker-id 4 --loss-type "${lossType}" --arc-checkpoint "${dir}"/contraints-$constraint.json
+  python train.py \
+  --net "${model}" \
+  --gpu \
+  --pretrained \
+  --worker-id 1 \
+  --batch-size 512 \
+  --loss-type "${lossType}" \
+  --arc-checkpoint "${dir}"/contraints-$constraint.json &
 
 done;
