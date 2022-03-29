@@ -264,8 +264,9 @@ def _resnet(
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)
-        state_dict['fc.weight'] = torch.mean(state_dict['fc.weight'], dim=0, keepdim=True).repeat(100, 1)
-        state_dict['fc.bias'] = torch.mean(state_dict['fc.bias'], dim=0, keepdim=True).repeat(100)
+        num_classes = 100 if kwargs.get('num_classes') is None else kwargs.get('num_classes')
+        state_dict['fc.weight'] = torch.mean(state_dict['fc.weight'], dim=0, keepdim=True).repeat(num_classes, 1)
+        state_dict['fc.bias'] = torch.mean(state_dict['fc.bias'], dim=0, keepdim=True).repeat(num_classes)
         model.load_state_dict(state_dict)
     return model
 
