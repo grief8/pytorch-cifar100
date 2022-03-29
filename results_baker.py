@@ -33,7 +33,7 @@ def get_accuracy(base_path):
 
 
 if __name__ == '__main__':
-    base = '/home/lifabing/projects/pytorch-cifar100/runs/mobilenet/logfunction'
+    base = '/home/lifabing/projects/pytorch-cifar100/runs/resnet18/origin'
     data = get_accuracy(base)
     data = [(key, data[key]) for key in sorted(data)]
     for i in range(len(data)):
