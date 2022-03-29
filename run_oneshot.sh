@@ -2,7 +2,7 @@
 for constraint in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0;
 do
   echo constraint: $constraint
-  model=resnet50
+  model=vgg16
   lossType=logfunction
   dir=./checkpoints/oneshot/"${model}"/"${lossType}"
   #  search
@@ -12,6 +12,8 @@ do
   --gpu \
   --pretrained \
   --worker-id 1 \
+  --batch-size 256 \
+  --loss-type "${lossType}" \
   --constraint $constraint \
   --arc-checkpoint "${dir}"/contraints-$constraint.json \
   --model-path "${dir}"/contraints-$constraint.onnx
