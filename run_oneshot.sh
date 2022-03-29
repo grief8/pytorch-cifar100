@@ -2,7 +2,7 @@
 for constraint in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0;
 do
   echo constraint: $constraint
-  model=mobilenet
+  model=resnet18
   lossType=logfunction
   dir=./checkpoints/oneshot/"${model}"/"${lossType}"
   #  search
@@ -12,9 +12,9 @@ do
 #  --gpu \
 #  --worker-id 1 \
 #  --constraint $constraint \
-#  --checkpoints "${dir}"/contraints-$constraint.json \
+#  --arc-checkpoint "${dir}"/contraints-$constraint.json \
 #  --model-path "${dir}"/contraints-$constraint.onnx
 #  retrain
-  python train.py --net "${model}" --gpu --worker-id 2 --loss-type "${lossType}" --arc-checkpoint "${dir}"/contraints-$constraint.json
+  python train.py --net "${model}" --gpu --worker-id 4 --loss-type "${lossType}" --arc-checkpoint "${dir}"/contraints-$constraint.json
 
 done;

@@ -30,8 +30,8 @@ if __name__ == "__main__":
     parser.add_argument("--unrolled", default=False, action="store_true")
     parser.add_argument("--visualization", default=True, action="store_true")
     parser.add_argument("--pretrained", default=False, action="store_true")
-    parser.add_argument("--arc-checkpoint", default='./checkpoints/oneshot/mobilenet/contraints-0.5.json', type=str)
-    parser.add_argument("--model-path", default="./checkpoints/oneshot/mobilenet/contraints-0.5.onnx", type=str)
+    parser.add_argument("--arc-checkpoint", default='./checkpoints/oneshot/checkpoint.json', type=str)
+    parser.add_argument("--model-path", default="./checkpoints/oneshot/checkpoint.onnx", type=str)
 
     args = parser.parse_args()
 
