@@ -204,6 +204,9 @@ def get_network(args):
             net.load_state_dict(torch.load(args.weights))
             from models.refactor import NewVGG16
             net = NewVGG16(net)
+    elif args.net == "trial_mobilenet":
+        from nas.trial.trial_mobilenet import _model
+        net = _model()
 
     else:
         print('the network name you have entered is not supported yet')
