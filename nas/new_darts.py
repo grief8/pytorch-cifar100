@@ -175,7 +175,7 @@ class DartsTrainer(BaseOneShotTrainer):
             name = module.__class__.__name__
             if name.find('DartsLayerChoice') != -1:
                 n_alpha = F.softmax(module.alpha, -1).detach().cpu().numpy()[1]
-                total = total + torch.pow(torch.tensor(n_alpha * self.nonlinear_summary[self.nonlinear_index] / self.nonlinear_size), 2)
+                total = total + 0.5 * torch.pow(torch.tensor(n_alpha * self.nonlinear_summary[self.nonlinear_index] / self.nonlinear_size), 2)
                 self.nonlinear_index += 1
         return total
 
