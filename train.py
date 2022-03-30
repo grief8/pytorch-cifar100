@@ -25,7 +25,7 @@ from torch.utils.tensorboard import SummaryWriter
 from conf import settings
 from nas.mobilenet import mobilenet
 from nas.tools import reconstruct_model
-from utils import get_nas_network, get_training_dataloader, get_test_dataloader, WarmUpLR, \
+from utils import get_nas_network, get_network, get_training_dataloader, get_test_dataloader, WarmUpLR, \
     most_recent_folder, most_recent_weights, last_epoch, best_acc_weights
 
 
@@ -125,6 +125,7 @@ if __name__ == '__main__':
     parser.add_argument('--net', type=str, required=True, help='net type')
     parser.add_argument('--weights', type=str, default=None, help='the weights file you want to test')
     parser.add_argument('--loss-type', type=str, default='origin', help='the way to change loss function')
+    parser.add_argument('--raw-model', action='store_true', default=False, help='train a raw torchvision model or not')
     parser.add_argument('--gpu', action='store_true', default=False, help='use gpu or not')
     parser.add_argument("--worker-id", default=0, type=int)
     parser.add_argument('--batch-size', type=int, default=128, help='batch size for dataloader')
@@ -137,7 +138,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     torch.cuda.set_device(args.worker_id)
-    net = reconstruct_model(get_nas_network(args, class_flag=True), args.arc_checkpoint, 'cpu' if not args.gpu else 'cuda')
+    if args.raw_model:
+        net = get_network(args)
+    else:
+        net = reconstruct_model(get_nas_network(args, class_flag=True), args.arc_checkpoint, 'cpu' if not args.gpu else 'cuda')
 
     # data preprocessing:
     cifar100_training_loader = get_training_dataloader(
