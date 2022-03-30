@@ -26,17 +26,20 @@ def get_accuracy(base_path):
     for dirs in os.listdir(base_path):
         print(dirs)
         for file in os.listdir(os.path.join(base_path, dirs)):
-            val = readEvent(os.path.join(base_path, dirs, file), 'Test/Accuracy')
-            val = pd.DataFrame(val)
-            data[dirs] = val['value'].max()
+            try:
+                val = readEvent(os.path.join(base_path, dirs, file), 'Test/Accuracy')
+                val = pd.DataFrame(val)
+                data[dirs.split('-')[-1]] = val['value'].max()
+            except:
+                pass
     return data
 
 
 if __name__ == '__main__':
-    base = '/home/lifabing/projects/pytorch-cifar100/runs/resnet18/origin'
+    base = '/home/lifabing/projects/pytorch-cifar100/runs/vgg16/logfunction'
     data = get_accuracy(base)
     data = [(key, data[key]) for key in sorted(data)]
     for i in range(len(data)):
-        print('{}   {}'.format((i + 1) / 10., data[i][1]))
+        print('{}   {}'.format(data[i][0], data[i][1]))
 
 
