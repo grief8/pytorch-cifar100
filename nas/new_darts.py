@@ -168,6 +168,17 @@ class DartsTrainer(BaseOneShotTrainer):
                 self.nonlinear_index += 1
         return total
 
+    def _l2_loss(self, model):
+        total = torch.tensor([0], dtype=torch.float64).cuda()
+        for module in model.children():
+            total = total + self._get_total_alpha(module)
+            name = module.__class__.__name__
+            if name.find('DartsLayerChoice') != -1:
+                n_alpha = F.softmax(module.alpha, -1).detach().cpu().numpy()[1]
+                total = total + torch.pow(torch.tensor(n_alpha * self.nonlinear_summary[self.nonlinear_index] / self.nonlinear_size), 2)
+                self.nonlinear_index += 1
+        return total
+
     def _cal_new_loss(self, loss):
         self.nonlinear_index = 0
         if self.loss_type == 'origin':
@@ -178,6 +189,8 @@ class DartsTrainer(BaseOneShotTrainer):
         elif self.loss_type == 'sqrt':
             # 0 < alpha < 1
             loss = loss * math.sqrt(1 - self._get_total_alpha(self.model)) * self.constraints
+        elif self.loss_type == 'l2regularization':
+            loss = loss + self._l2_loss(self.model) * self.constraints
         return loss
 
     def _init_dataloader(self):
