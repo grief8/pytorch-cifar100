@@ -8,7 +8,7 @@ function run() {
 #  fi
   model=$2
   lossType=$3
-  echo start "${model}" "${lossType}" "$constraint" $wid
+  echo start "${model}" "${lossType}" "$constraint" "$wid"
   dir=./checkpoints/oneshot/"${model}"/"${lossType}"
   #  search
   mkdir -p "${dir}"
@@ -16,7 +16,7 @@ function run() {
   --net "${model}" \
   --gpu \
   --pretrained \
-  --worker-id $wid \
+  --worker-id "$wid" \
   --epochs 100 \
   --batch-size 1024 \
   --loss-type "${lossType}" \
@@ -28,7 +28,7 @@ function run() {
   --net "${model}" \
   --gpu \
   --pretrained \
-  --worker-id $wid \
+  --worker-id "$wid" \
   --batch-size 1024 \
   --loss-type "${lossType}" \
   --arc-checkpoint "${dir}"/contraints-"$constraint".json
