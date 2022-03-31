@@ -168,14 +168,14 @@ if __name__ == '__main__':
     warmup_scheduler = WarmUpLR(optimizer, iter_per_epoch * args.warm)
 
     if args.resume:
-        recent_folder = most_recent_folder(os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type), fmt=settings.DATE_FORMAT)
+        recent_folder = most_recent_folder(os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type, args.arc_checkpoint.split('/')[-1].strip('.json')), fmt=settings.DATE_FORMAT)
         if not recent_folder:
             raise Exception('no recent folder were found')
 
-        checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type, recent_folder)
+        checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type, args.arc_checkpoint.split('/')[-1].strip('.json'), recent_folder)
 
     else:
-        checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type, settings.TIME_NOW)
+        checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, args.loss_type, args.arc_checkpoint.split('/')[-1].strip('.json'), settings.TIME_NOW)
 
     # use tensorboard
     if not os.path.exists(settings.LOG_DIR):
