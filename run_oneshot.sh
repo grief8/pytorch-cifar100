@@ -1,11 +1,11 @@
 #!/bin/bash
 function run() {
   constraint=$1
-  wid=$(echo "scale=0;  ($1*10)%7/1" | bc)
-  if test "$wid" -eq 3
-  then
-      wid=7
-  fi
+  wid=$(echo "scale=0;  ($1*10)%8/1" | bc)
+#  if test "$wid" -eq 3
+#  then
+#      wid=7
+#  fi
   model=$2
   lossType=$3
   echo start "${model}" "${lossType}" "$constraint" $wid
